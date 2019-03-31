@@ -130,7 +130,7 @@ def main6():
     pygame.display.set_caption('Geometry')
     clock = pygame.time.Clock()
 
-    point_amount = 5
+    point_amount = 10
     points = creators.get_parr(point_amount)
     for i in range(point_amount):
         points[i].draw(screen)
@@ -141,20 +141,50 @@ def main6():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        clock.tick(200)
+        clock.tick(100)
         for i in points:
             i.move()
-            i.draw(screen)
+            i.draw(screen, clr.YELLOW, 10)
 
         CH = relative.quick_hall(points)
         dr.draw_pset(screen, CH)
-
-        if clc.calc_perimetr(CH) > 900:
+        perimetr = clc.calc_perimetr(CH)
+        print(perimetr)
+        if perimetr > 1000:
             for i in CH:
                 i.set_speed(-i.get_speed()[1], i.get_speed()[0])
 
         pygame.display.flip()
 
 
+def main7():
+    screen = pygame.display.set_mode([800, 800])
+    screen.fill(clr.WHITE)
+    pygame.display.set_caption('Geometry')
+    clock = pygame.time.Clock()
+    points = []
+    CH = []
+
+    run = True
+    while run:
+        screen.fill(clr.WHITE)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                p = point.Point(pos[0], pos[1])
+                points.append(p)
+                relative.dynamic_hull(CH, p)
+        if CH:
+            dr.draw_pset(screen, CH)
+        for p in points:
+            p.draw(screen)
+        if points:
+            points[0].draw(screen, clr.GREEN)
+
+        pygame.display.flip()
+
+
 if __name__ == "__main__":
-    main6()
+    main7()

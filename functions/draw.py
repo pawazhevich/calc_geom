@@ -9,7 +9,7 @@ def draw_line(screen, p1, p2):
 def draw_pset(screen, set):
     arr = set.copy()
     arr.append(set[0])
-    for i in range(len(arr)-2):
+    for i in range(len(arr)-1):
         draw_line(screen, arr[i], arr[i+1])
 
 

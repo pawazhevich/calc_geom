@@ -36,3 +36,6 @@ class Point:
 
     def get_next_coords(self):
         return [self.x+self.xv, self.y+self.yv]
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y

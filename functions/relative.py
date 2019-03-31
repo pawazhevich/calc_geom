@@ -353,3 +353,65 @@ def iter_hall(points, left, right, CH):
         iter_hall(sl, left, lrp, CH)
         iter_hall(sl, lrp, right, CH)
 
+
+def dynamic_hull(CH, point):
+
+    if len(CH) == 0:
+        CH.append(point)
+        return
+
+    elif len(CH) == 1:
+        if not CH[0].__eq__(point):
+            CH.append(point)
+        return
+
+    elif len(CH) == 2:
+        if not CH[0].__eq__(point) and not CH[1].__eq__(point):
+            p1 = CH[0].get_coords()
+            p2 = CH[1].get_coords()
+            p = point.get_coords()
+            if check_point_position(p1, p2, p) != 0:
+                if check_point_position(p1, p2, p) == 1:
+                    CH.insert(1, point)
+                else:
+                    CH.append(point)
+                return
+            else:
+                if scalar_product(get_vector(p, p1), get_vector(p, p2)) < 0:
+                    return
+                if scalar_product(get_vector(p1, p), get_vector(p1, p2)) < 0:
+                    CH[0] = point
+                    return
+                if scalar_product(get_vector(p2, p), get_vector(p2, p1)) < 0:
+                    CH[1] = point
+                    return
+    else:
+        new = []
+        CH.append(CH[0])
+        flag = -1
+        for i in range(len(CH)-1):
+            p1 = CH[i].get_coords()
+            p2 = CH[i+1].get_coords()
+            p = point.get_coords()
+            if check_point_position(p1, p2, p) == 1:
+                if point not in new:
+                    new.append(CH[i])
+                    new.append(point)
+                else:
+                    if flag == 1:
+                        if new[-1] != point:
+                            del new[-1]
+                            new.append(CH[i])
+                    else:
+                        new.append(CH[i])
+                flag = 1
+            else:
+                flag = -1
+                new.append(CH[i])
+
+        if flag == 1 and check_point_position(CH[0].get_coords(), CH[1].get_coords(), point.get_coords()) == 1:
+            del new[0]
+
+        CH.clear()
+        CH.extend(new)
+

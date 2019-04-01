@@ -176,12 +176,12 @@ def main7():
                 p = point.Point(pos[0], pos[1])
                 points.append(p)
                 relative.dynamic_hull(CH, p)
-        if CH:
-            dr.draw_pset(screen, CH)
         for p in points:
             p.draw(screen)
-        if points:
-            points[0].draw(screen, clr.GREEN)
+
+        if CH:
+            dr.draw_pset(screen, CH)
+            CH[0].draw(screen, clr.GREEN)
 
         pygame.display.flip()
 

@@ -404,6 +404,7 @@ def dynamic_hull(CH, point):
                             new.append(CH[i])
                     else:
                         new.append(CH[i])
+                        new.append(CH[i])
                 flag = 1
             else:
                 flag = -1
@@ -411,6 +412,7 @@ def dynamic_hull(CH, point):
 
         if flag == 1 and check_point_position(CH[0].get_coords(), CH[1].get_coords(), point.get_coords()) == 1:
             del new[0]
+            del new[-1]
 
         CH.clear()
         CH.extend(new)

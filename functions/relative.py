@@ -1,4 +1,5 @@
 import math
+WINDOW_SIZE = 800
 
 
 def determinant(p1, p2, p):
@@ -24,6 +25,10 @@ def vector_product(v1, v2):
     return v1[0]*v2[1]-v1[1]*v2[0]
 
 
+def triangle_area(p1, p2, p3):
+   return abs(determinant(p1.get_coords(), p2.get_coords(), p3.get_coords())/2)
+
+
 def cos(v1, v2):
     sp = scalar_product
     product = sp(v1, v2)
@@ -43,7 +48,7 @@ def get_min_point(points):
     return min
 
 
-def check_point_position(p1, p2, p):
+def check_point_position(p1, p2, p, ebs = 10):
     d = determinant(p1, p2, p)
     if d == 0:
         return 0
@@ -249,14 +254,13 @@ def max_remote_point(p1, p2, points):
     return mrp
 
 
-
 def alg_darvisa(points):
     min_point = get_min_point(points)
     CH = [min_point]
     arr = points.copy()
     p_mc = 1
 
-    while p_mc != []:
+    while p_mc:
         max_cos = -1
         p_mc = []
         p0 = CH[-1].get_coords()
@@ -272,7 +276,7 @@ def alg_darvisa(points):
             CH.append(p_mc)
 
     p_mc = 1
-    while p_mc != []:
+    while p_mc:
         max_cos = -1
         p_mc = []
         p0 = CH[-1].get_coords()
@@ -288,6 +292,32 @@ def alg_darvisa(points):
             CH.append(p_mc)
 
     return CH
+
+
+def diameter(ch):
+    max = -1
+    k = len(ch)
+    ch.append(ch[0])
+    i = 1
+    temp = 0
+    while triangle_area(ch[k-1], ch[0], ch[i+1]) > triangle_area(ch[k-1], ch[0], ch[i]):
+        i = i+1
+    start = i
+    j = 0
+    while temp < k:
+        temp = start
+        while triangle_area(ch[j], ch[j+1], ch[temp+1]) >= triangle_area(ch[j], ch[j+1], ch[temp]):
+            temp = temp + 1
+            if temp >= k:
+                break
+        end = temp
+        for a in range(start, end+1):
+            if length(ch[a].get_coords(), ch[j].get_coords()) > max:
+                max = length(ch[a].get_coords(), ch[j].get_coords())
+                result = a, j
+        j = j+1
+        start = end
+    return result
 
 
 def max_remote_points(points):
@@ -416,4 +446,171 @@ def dynamic_hull(CH, point):
 
         CH.clear()
         CH.extend(new)
+
+
+def min(a, b):
+    if a < b:
+        return a
+    else:
+        return b
+
+
+def max(a, b):
+    if a > b:
+        return a
+    else:
+        return b
+
+
+def sorted_by_x(points):
+    points = points.copy()
+
+    for i in range(len(points)):
+        for j in range(len(points)):
+            if points[i][0] < points[j][0]:
+                points[i], points[j] = points[j], points[i]
+    return points
+
+
+def sorted_by_y(points):
+    points = points.copy()
+
+    for i in range(len(points)):
+        for j in range(len(points)):
+            if points[i][1] < points[j][1]:
+                points[i], points[j] = points[j], points[i]
+    return points
+
+
+def get_near_pair(points, result_pair):
+    points = points.copy()
+
+    X = sorted_by_x(points)
+    Y = sorted_by_y(points)
+
+    return rec_part(X, Y)
+
+
+def rec_part(X, Y):
+    d = WINDOW_SIZE*math.sqrt(2)
+    if len(X) <= 3:
+        pair = []
+        for i in range(len(X)):
+            for j in range(len(X)):
+                if i != j and length(X[i], X[j]) < d:
+                    d = length(X[i], X[j])
+                    pair.append(X[i])
+                    pair.append(X[j])
+        return d, pair
+    sep_i = len(X) // 2
+    Psep = X[sep_i]
+    XL = X[0: sep_i]
+    XR = X[sep_i: len(X)]
+    YL = []
+    YR = []
+
+    for i in range(len(Y)):
+        if Y[i][0] >= Psep[0]:
+            YR.append(Y[i])
+        if Y[i][0] < Psep[0]:
+            YL.append(Y[i])
+    #print(len(XR) == len(YR))
+    #print(len(XL) == len(YL))
+
+    min_left, first = rec_part(XL, YL)
+    min_right, second = rec_part(XR, YR)
+
+    if min_left < min_right:
+        pair = first
+    else:
+        pair = second
+    d = min(min_left, min_right)
+
+    central_points = []
+    for i in range(len(Y)):
+        if abs(Y[i][0] - Psep[0]) < d:
+            central_points.append(Y[i])
+
+    for i in range(len(central_points)-1):
+        j = i+1
+        while j < i+7 and j < len(central_points):
+            if i != j and length(central_points[i], central_points[j]) < d:
+                d = length(central_points[i], central_points[j])
+                pair.clear()
+                pair.append(central_points[i])
+                pair.append(central_points[j])
+            j += 1
+
+    return d, pair
+
+
+def intersect_point(line1, line2):
+    if check_point_position(line1[0], line1[1], line2[0]) == 0:
+        return line2[0]
+    elif check_point_position(line1[0], line1[1], line2[1]) == 0:
+        return line2[1]
+    elif check_point_position(line2[0], line2[1], line1[0]) == 0:
+        return line1[0]
+    elif check_point_position(line2[0], line2[1], line1[1]) == 0:
+        return line1[1]
+    else:
+        return rec_half_find(line1, line2)
+
+
+def rec_half_find(line1, line2):
+    xsep = (line1[0][0] + line1[1][0]) / 2
+    ysep = (line1[0][1] + line1[1][1]) / 2
+    psep = [xsep, ysep]
+
+    if check_point_position(line2[0], line2[1], psep) == 0:
+        return psep
+    if is_intersect(line1[0], psep, line2[0], line2[1]):
+        return rec_half_find([line1[0], psep], [line2[0], line2[1]])
+    else:
+        return rec_half_find([psep, line1[1]], [line2[0], line2[1]])
+
+
+def intersect_param(line1, line2):
+    p = intersect_point(line1, line2)
+    l = length(line1[0], line1[1])
+    t = length(line1[0], p)/l
+    return t
+
+
+def pp_or_pv(p1, p2, a, b):
+    c = ((p2[1] - p1[1])*(b[0] - a[0]) - (p2[0] - p1[0])*(b[1] - a[1]))
+    if c > 0:
+        return "PP"
+    elif c < 0:
+        return "PV"
+
+
+def point_by_param(line, t):
+    A = line[0]
+    B = line[1]
+    A1 = [A[0]*(1-t), A[1]*(1-t)]
+    B1 = [B[0]*t, B[1]*t]
+    return [round((x + y), 2) for x, y in zip(A1, B1)]
+
+
+def cut_segment(polygon, segment):
+    p = polygon.copy()
+    p.append(polygon[0])
+    T = [0, 1]
+    flag = False
+    for i in range(len(p)-1):
+        if is_intersect(segment[0], segment[1], p[i], p[i+1]):
+            flag = True
+            t = intersect_param([segment[0], segment[1]], [p[i], p[i+1]])
+            if pp_or_pv(p[i], p[i+1], segment[0], segment[1]) == "PV":
+                T[0] = max(T[0], t)
+            elif pp_or_pv(p[i], p[i+1], segment[0], segment[1]) == "PP":
+                T[1] = min(T[1], t)
+
+    if not flag and check_point_position(p[0], p[1], segment[0]) == -1:
+        return [[], []]
+    if T[0] > T[1]:
+        return 0
+    elif T[0] <= T[1]:
+        return [point_by_param(segment, T[0]), point_by_param(segment, T[1])]
 

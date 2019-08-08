@@ -15,7 +15,7 @@ class Point:
         self.y = self.y + self.yv
 
     def draw(self, window, color=clr.BLACK, width = 4):
-        pygame.draw.circle(window, color, (self.x, self.y), width)
+        pygame.draw.circle(window, color, (int(self.x), int(self.y)), width)
 
     def get_coords(self):
         return [self.x, self.y]

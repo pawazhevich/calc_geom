@@ -95,7 +95,7 @@ def main5():
     pygame.display.set_caption('Geometry')
     clock = pygame.time.Clock()
 
-    point_amount = 10
+    point_amount = 50
     points = creators.get_parr(point_amount)
     for i in range(point_amount):
         points[i].draw(screen)
@@ -106,16 +106,16 @@ def main5():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        clock.tick(150)
+        clock.tick(50)
         for i in range(point_amount):
             points[i].move()
             points[i].draw(screen)
-        pair = relative.max_remote_points(points)[0], relative.max_remote_points(points)[1]
         CH = relative.alg_darvisa(points)
+        pair_index = relative.diameter(CH)
+        pair = [CH[pair_index[0]], CH[pair_index[1]]]
 
         dr.draw_pset(screen, CH)
-        pair[0].draw(screen, clr.GREEN)
-        pair[1].draw(screen, clr.GREEN)
+        dr.draw_pset(screen, [pair[0], pair[1]], clr.YELLOW)
 
         if relative.length(pair[0].get_coords(), pair[1].get_coords()) > 200:
             pair[0].set_speed(-pair[0].get_speed()[0], -pair[0].get_speed()[1])
@@ -186,5 +186,83 @@ def main7():
         pygame.display.flip()
 
 
+def main8():
+    screen = pygame.display.set_mode([800, 800])
+    polygon = [[200, 200], [400, 200], [350, 300], [290, 350], [200, 350]]
+    line1 = [[90, 400], [300, 110]] #segment
+    line2 = [[305, 100], [305, 345]]
+    line3 = [[100, 150], [300, 150]] #no intersection
+    line4 = [[300, 200], [250, 200]] #paraller & intersect
+    line5 = [[350, 300], [370, 340]]
+    line6 = [[250, 210], [400, 300]]
+    line7 = [[200, 100], [200, 400]]
+    line8 = [[360, 200], [367, 150]] #one point
+    line9 = [[500, 150], [100, 350]]
+    line10 = [[250, 300], [295, 307]]
+    segments = [line1, line2, line3, line4, line5, line6, line7, line8, line9, line10]
+    screen.fill(clr.WHITE)
+    pygame.display.set_caption('Geometry')
+    clock = pygame.time.Clock()
+    cut_segm = []
+
+    dr.draw_pset(screen, polygon, clr.BLACK)
+    for i in range(len(segments)):
+        segm = relative.cut_segment(polygon, segments[i])
+        cut_segm.append(segm)
+        dr.draw_line(screen, segments[i][0], segments[i][1], clr.GREEN)
+        dr.draw_line(screen, segm[0], segm[1], clr.RED)
+
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        clock.tick(30)
+        pygame.display.flip()
+
+    pygame.quit()
+
+
+def main10():
+    screen = pygame.display.set_mode([800, 800])
+    screen.fill(clr.WHITE)
+    pygame.display.set_caption('Geometry')
+    clock = pygame.time.Clock()
+
+    p = []
+    points = []
+    i = 0
+    point_amount = 25
+    while i < point_amount:
+        p.append([random.randint(100, 700), random.randint(100, 700)])
+        i = i + 1
+    i = 0
+    while i < point_amount:
+        points.append(point.Point(p[i][0], p[i][1], 0, 0))
+        i = i + 1
+    pair = []
+    distance, pair = relative.get_near_pair(p, pair)
+    print(distance)
+    print(relative.length(pair[0], pair[1]))
+    a = point.Point(pair[0][0], pair[0][1], 0, 0)
+    b = point.Point(pair[1][0], pair[1][1], 0, 0)
+    run = True
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        screen.fill(clr.WHITE)
+        clock.tick(30)
+
+        for i in range(len(points)):
+            points[i].draw(screen, clr.GREEN, 5)
+        a.draw(screen, clr.RED)
+        b.draw(screen, clr.RED)
+        pygame.display.flip()
+
+    pygame.quit()
+
+
 if __name__ == "__main__":
-    main7()
+    main10()
